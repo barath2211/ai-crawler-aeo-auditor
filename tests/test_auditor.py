@@ -60,3 +60,11 @@ def test_robots_blocking_ai_bots():
 def test_noindex_fails():
     r = checks.check_robots_meta(soup('<meta name="robots" content="noindex,nofollow">'))
     assert r.status == "fail"
+
+
+def test_answer_matching_is_strict_but_format_tolerant():
+    from aeo.answerability import is_correct
+    assert is_correct("Revenue was EUR 1204.6 million.", ["1,204.6"])
+    assert is_correct("Revenue was EUR 1 204.6 million.", ["1,204.6"])
+    assert not is_correct("NOT FOUND (though 1,204.6 appears elsewhere)", ["1,204.6"])
+    assert not is_correct("Revenue was EUR 1,113.3 million.", ["1,204.6"])

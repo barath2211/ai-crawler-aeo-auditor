@@ -14,6 +14,8 @@
 
 `after.html` loses points on S1 because it's 195 words and still has one empty chart mount point. That's intentional: it shows partial credit working.
 
+Answer matching is strict: a reply containing "NOT FOUND" is always wrong, and the expected value must appear after normalising number formatting (`1,204.6` = `1204.6` = `1 204.6`). This stops a model from scoring by hedging or by listing every number on the page.
+
 The mock answerer finds sentences containing the expected value, so it measures whether the fact is *present* in crawler-visible text. A real model also tests whether it's *understandable* in context (e.g. the right year's figure from a table). Run both.
 
 ## Running with a real model

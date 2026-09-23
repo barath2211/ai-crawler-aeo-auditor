@@ -85,7 +85,7 @@ def main() -> None:
     ap.add_argument("--robots", help="robots.txt to use (defaults to the site's own for URLs)")
     ap.add_argument("--llms", help="llms.txt to use")
     ap.add_argument("--questions", help="JSON list of {question, answer_contains} for the answerability eval")
-    ap.add_argument("--provider", choices=["mock", "ollama", "openai", "anthropic"])
+    ap.add_argument("--provider", choices=["mock", "ollama", "ollama-small", "openai", "gemini", "anthropic"])
     ap.add_argument("--json", help="write JSON report to this path")
     ap.add_argument("--md", help="write markdown report to this path")
     ap.add_argument("--fail-under", type=int, default=0, help="exit 1 if score is below this (for CI)")

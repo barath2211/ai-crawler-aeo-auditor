@@ -37,6 +37,21 @@ def _mock_answer(context: str, expected: list[str]) -> str:
     return "NOT FOUND"
 
 
+def _norm(s: str) -> str:
+    """Compare facts, not formatting: '1,204.6', '1204.6' and 'EUR 1 204.6' all match."""
+    s = s.lower().replace("\u00a0", " ")
+    s = re.sub(r"(?<=\d)[,\s](?=\d{3}\b)", "", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def is_correct(answer: str, expected: list[str]) -> bool:
+    """Strict: the model must not hedge with NOT FOUND, and must state an expected value."""
+    if "not found" in answer.lower():
+        return False
+    a = _norm(answer)
+    return any(_norm(e) in a for e in expected)
+
+
 def evaluate(client: LLMClient, soup: BeautifulSoup, questions: list[dict]) -> dict:
     context = crawler_view(soup)[:12000]
     rows = []
@@ -44,8 +59,7 @@ def evaluate(client: LLMClient, soup: BeautifulSoup, questions: list[dict]) -> d
         resp = client.chat("writer", SYSTEM, f"<page>\n{context}\n</page>\n\nQuestion: {q['question']}",
                            mock=lambda q=q: _mock_answer(context, q["answer_contains"]))
         answer = resp.text.strip()
-        norm = re.sub(r"\s+", " ", answer)
-        correct = any(exp in norm for exp in q["answer_contains"])
+        correct = is_correct(answer, q["answer_contains"])
         rows.append({"question": q["question"], "answer": answer, "correct": correct, "model": resp.model})
     n_ok = sum(r["correct"] for r in rows)
     return {"answered_pct": round(100 * n_ok / len(rows)) if rows else 0, "answered": n_ok, "total": len(rows), "rows": rows}
